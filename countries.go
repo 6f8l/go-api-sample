@@ -14,7 +14,7 @@ func main() {
 		rest.Get("/countries", GetAllCountries),
 		rest.Post("/countries", PostCountry),
 		rest.Get("/countries/:code", GetCountry),
-		// rest.Delete("/countries/:code", DeleteCountry)
+		rest.Delete("/countries/:code", DeleteCountry),
 	)
 
 	// error handling
@@ -53,8 +53,9 @@ func GetCountry(w rest.ResponseWriter, r *rest.Request) {
 }
 
 func GetAllCountries(w rest.ResponseWriter, r *rest.Request) {
-	lock.Rlock()
-	countries := make([]country, len(store))
+	lock.RLock()
+
+	countries := make([]Country, len(store))
 	i := 0
 	for _, country := range store {
 		countries[i] = *country
@@ -83,4 +84,12 @@ func PostCountry(w rest.ResponseWriter, r *rest.Request) {
 	store[country.Code] = &country
 	lock.Unlock()
 	w.WriteJson(&country)
+}
+
+func DeleteCountry(w rest.ResponseWriter, r *rest.Request) {
+    code := r.PathParam("code")
+    lock.Lock()
+    delete(store, code)
+    lock.Unlock()
+    w.WriteHeader(http.StatusOK)
 }
