@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/ant0ine/go-json-rest/rest"
 	"log"
 	"net/http"
 	"sync"
+
+	"github.com/ant0ine/go-json-rest/rest"
 )
 
 func main() {
@@ -87,9 +88,9 @@ func PostCountry(w rest.ResponseWriter, r *rest.Request) {
 }
 
 func DeleteCountry(w rest.ResponseWriter, r *rest.Request) {
-    code := r.PathParam("code")
-    lock.Lock()
-    delete(store, code)
-    lock.Unlock()
-    w.WriteHeader(http.StatusOK)
+	code := r.PathParam("code")
+	lock.Lock()
+	delete(store, code)
+	lock.Unlock()
+	w.WriteHeader(http.StatusOK)
 }
