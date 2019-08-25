@@ -11,7 +11,7 @@ func main() {
 	api := rest.NewApi()
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
-		// rest.Get("/countries", GetAllCountries),
+		rest.Get("/countries", GetAllCountries),
 		// rest.Post("/countries", PostCountry),
 		rest.Get("/countries", GetCountry),
 		// rest.Delete("/countries/:code", DeleteCountry)
@@ -50,4 +50,16 @@ func GetCountry(w rest.ResponseWriter, r *rest.Request) {
 		return
 	}
 	w.WriteJson(country)
+}
+
+func GetAllCountries(w rest.ResponseWriter, r *rest.Request) {
+	lock.Rlock()
+	countries := make([]country, len(store))
+	i := 0
+	for _, country := range store {
+		countries[i] = *country
+		i++
+	}
+	lock.RUnlock()
+	w.WriteJson(&countries)
 }
