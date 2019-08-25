@@ -12,8 +12,8 @@ func main() {
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
 		rest.Get("/countries", GetAllCountries),
-		// rest.Post("/countries", PostCountry),
-		rest.Get("/countries", GetCountry),
+		rest.Post("/countries", PostCountry),
+		rest.Get("/countries/:code", GetCountry),
 		// rest.Delete("/countries/:code", DeleteCountry)
 	)
 
@@ -62,4 +62,25 @@ func GetAllCountries(w rest.ResponseWriter, r *rest.Request) {
 	}
 	lock.RUnlock()
 	w.WriteJson(&countries)
+}
+
+func PostCountry(w rest.ResponseWriter, r *rest.Request) {
+	country := Country{}
+	err := r.DecodeJsonPayload(&country)
+	if err != nil {
+		rest.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if country.Code == "" {
+		rest.Error(w, "country code required", 400)
+		return
+	}
+	if country.Name == "" {
+		rest.Error(w, "country name required", 400)
+		return
+	}
+	lock.Lock()
+	store[country.Code] = &country
+	lock.Unlock()
+	w.WriteJson(&country)
 }
